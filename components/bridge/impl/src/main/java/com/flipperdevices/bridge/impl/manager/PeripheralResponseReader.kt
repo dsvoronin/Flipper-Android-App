@@ -1,34 +1,39 @@
 package com.flipperdevices.bridge.impl.manager
 
 import com.flipperdevices.bridge.impl.utils.ByteEndlessInputStream
+import com.flipperdevices.core.utils.newSingleThreadExecutor
 import com.flipperdevices.protobuf.Flipper
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 const val TAG = "PeripheralResponseReader"
 
-@ObsoleteCoroutinesApi
 @Suppress("BlockingMethodInNonBlockingContext")
 class PeripheralResponseReader(
     private val scope: CoroutineScope
 ) {
     private val byteInputStream = ByteEndlessInputStream()
     private val responses = MutableSharedFlow<Flipper.Main>()
+    private val responseReaderDispatcher = newSingleThreadExecutor(TAG)
+        .asCoroutineDispatcher()
 
     init {
         scope.launch {
-            withContext(newSingleThreadContext(TAG)) {
+            withContext(responseReaderDispatcher) {
                 while (this.isActive) {
-                    val main = Flipper.Main.parseDelimitedFrom(byteInputStream)
-                    scope.launch {
-                        responses.emit(main)
+                    try {
+                        val main = Flipper.Main.parseDelimitedFrom(byteInputStream)
+                        scope.launch {
+                            responses.emit(main)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }

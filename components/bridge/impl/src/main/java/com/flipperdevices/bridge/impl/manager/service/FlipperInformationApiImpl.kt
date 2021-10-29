@@ -60,7 +60,7 @@ class FlipperInformationApiImpl : BluetoothGattServiceWrapper, FlipperInformatio
         }.enqueue()
     }
 
-    override fun reset() {
+    override fun reset(bleManager: UnsafeBleManager) {
         informationState.update { FlipperGATTInformation() }
     }
 

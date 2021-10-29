@@ -7,7 +7,7 @@ import com.flipperdevices.bridge.api.manager.FlipperBleManager
 import com.flipperdevices.bridge.api.utils.Constants
 import com.flipperdevices.bridge.impl.manager.delegates.FlipperConnectionInformationApiImpl
 import com.flipperdevices.bridge.impl.manager.service.FlipperInformationApiImpl
-import com.flipperdevices.bridge.impl.manager.service.FlipperSerialApiImpl
+import com.flipperdevices.bridge.impl.manager.service.FlipperRequestApiImpl
 import com.flipperdevices.core.utils.newSingleThreadExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -28,8 +28,7 @@ class FlipperBleManagerImpl constructor(
 
     // Gatt Delegates
     override val informationApi = FlipperInformationApiImpl()
-    override val serialApi = FlipperSerialApiImpl(scope)
-    override val flipperRequestApi = FlipperRequestApiImpl(serialApi, scope)
+    override val flipperRequestApi = FlipperRequestApiImpl(scope)
 
     // Manager delegates
     override val connectionInformationApi = FlipperConnectionInformationApiImpl(this)
@@ -77,7 +76,7 @@ class FlipperBleManagerImpl constructor(
             requestMtu(Constants.BLE.MTU).enqueue()
 
             informationApi.initialize(this@FlipperBleManagerImpl)
-            serialApi.initialize(this@FlipperBleManagerImpl)
+            flipperRequestApi.initialize(this@FlipperBleManagerImpl)
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
@@ -87,7 +86,7 @@ class FlipperBleManagerImpl constructor(
                 }
             }
 
-            serialApi.onServiceReceived(
+            flipperRequestApi.onServiceReceived(
                 gatt.getService(Constants.BLESerialService.SERVICE_UUID)
             )
             informationApi.onServiceReceived(
@@ -101,8 +100,8 @@ class FlipperBleManagerImpl constructor(
         }
 
         override fun onServicesInvalidated() {
-            informationApi.reset()
-            serialApi.reset()
+            informationApi.reset(this@FlipperBleManagerImpl)
+            flipperRequestApi.reset(this@FlipperBleManagerImpl)
         }
     }
 }
