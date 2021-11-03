@@ -17,19 +17,19 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - name: 'Set variables'
-        id: vars
-        run: |
-          export $(cat .github/workflows/version.env | xargs)
-          echo "::set-output name=major_version::${MAJOR_VERSION}"
       - name: Generate build number
         id: buildnumber
         uses: einaregilsson/build-number@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Set variables'
+        id: vars
+        run: |
+          export $(cat .github/workflows/version.env | xargs)
+          echo "::set-output name=major_version::${MAJOR_VERSION}"
       - name: Build internal release
         run: |
-          ./gradlew clean && \
+          ./gradlew clean
           ./gradlew :instances:app:assembleInternal :instances:app:bundleInternal \
             -Dversion_code=${{ steps.buildnumber.outputs.build_number }} \
             -Dversion_name="${{ steps.vars.outputs.major_version }}-internal-rc"
