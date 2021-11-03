@@ -25,9 +25,7 @@ jobs:
       - name: Build internal release
         run: |
           ./gradlew clean
-          ./gradlew :instances:app:assembleInternal :instances:app:bundleInternal \
-            -Dversion_code=${{ steps.buildnumber.outputs.build_number }} \
-            -Dversion_name="${{ steps.vars.outputs.major_version }}-internal-rc"
+          ./gradlew :instances:app:assembleInternal :instances:app:bundleInternal -Dversion_code=${{ steps.buildnumber.outputs.build_number }} -Dversion_name="${{ steps.vars.outputs.major_version }}-internal-rc"
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
