@@ -29,7 +29,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build internal release
         run: |
-          ./gradlew clean
+          ./gradlew clean && \
           ./gradlew :instances:app:assembleInternal :instances:app:bundleInternal \
             -Dversion_code=${{ steps.buildnumber.outputs.build_number }} \
             -Dversion_name="${{ steps.vars.outputs.major_version }}.${{ steps.buildnumber.outputs.build_number }}"
